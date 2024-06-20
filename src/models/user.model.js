@@ -52,17 +52,17 @@ const userSchema = new mongoose.Schema(
     }, { timestamps: true }
 );
 // data save tahye tyare just pela aa pre hook run thase , 1. sukarvanu aanu atyare ? password incrypt karvanu , 2. aama callback function tarike  simple function use karelu kem ke eanathi this keywor through values access kari sakay 
-userSchema.pre("save", async function (req, res, next) {
+userSchema.pre("save", async function (next) {
 
     if (!this.isModified("password")) return next()
 
-    this.password =  bcrypt.hash(this.password, 10);
+    this.password = await bcrypt.hash(this.password, 10)
     next()
 })
 
 userSchema.methods.isPasswordCorrect = async function (password) {
     return await bcrypt.compare(password, this.password);
-}
+};
 
 userSchema.methods.generateAccessToken = function () {
     var token = jwt.sign(
@@ -72,7 +72,7 @@ userSchema.methods.generateAccessToken = function () {
             username: this.username,
             fullName: this.fullName
         }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRY });
-        return token
+    return token
 }
 
 
